@@ -596,28 +596,87 @@ async function reordenarSolto(idMovido, idAlvo) {
 // ============================================================
 //  HISTÓRICO
 // ============================================================
+let histTurnos = [];    // serviços encerrados (todos)
+let histPorTurno = {};  // ocorrências arquivadas agrupadas por turnoId
+
 async function carregarHistorico() {
   const cont = $("lista-historico");
   cont.innerHTML = `<p class="dica">Carregando…</p>`;
   const snap = await getDocs(query(collection(db, "turnos"), where("ativo", "==", false)));
-  const turnos = [];
-  snap.forEach(d => turnos.push({ id: d.id, ...d.data() }));
-  turnos.sort((a, b) => msDe(b.inicio) - msDe(a.inicio));
+  histTurnos = [];
+  snap.forEach(d => histTurnos.push({ id: d.id, ...d.data() }));
+  histTurnos.sort((a, b) => msDe(b.inicio) - msDe(a.inicio));
 
-  if (turnos.length === 0) { cont.innerHTML = `<p class="vazio">Nenhum serviço encerrado ainda.</p>`; return; }
-
-  // Busca todas as ocorrências arquivadas de uma vez
   const oSnap = await getDocs(query(collection(db, "ocorrencias"), where("arquivada", "==", true)));
-  const porTurno = {};
+  histPorTurno = {};
   oSnap.forEach(d => {
     const o = d.data();
-    (porTurno[o.turnoId] = porTurno[o.turnoId] || []).push(o);
+    (histPorTurno[o.turnoId] = histPorTurno[o.turnoId] || []).push(o);
   });
 
+  renderHistorico();
+}
+
+// Data local do turno no formato "YYYY-MM-DD" (para comparar com os filtros)
+function diaLocal(t) {
+  const d = t.inicio && t.inicio.toDate ? t.inicio.toDate() : null;
+  if (!d) return "";
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+
+function turnoNoEscopo(t) {
+  const modo = $("filtro-modo").value;
+  const dia = diaLocal(t);
+  if (modo === "geral") return true;
+  if (!dia) return false;
+  if (modo === "mes") {
+    const m = $("filtro-mes").value;          // "YYYY-MM"
+    return !m || dia.slice(0, 7) === m;
+  }
+  if (modo === "periodo") {
+    const de = $("filtro-de").value, ate = $("filtro-ate").value;
+    if (de && dia < de) return false;
+    if (ate && dia > ate) return false;
+    return true;
+  }
+  return true;
+}
+
+function totaisDe(turnos) {
+  let enviadas = 0, atendidas = 0;
+  turnos.forEach(t => {
+    const list = histPorTurno[t.id] || [];
+    enviadas += list.length;
+    atendidas += list.filter(o => o.status === "atendida").length;
+  });
+  return { servicos: turnos.length, enviadas, atendidas, naoAtendidas: enviadas - atendidas };
+}
+
+function renderHistorico() {
+  // mostra/esconde os campos do filtro conforme o modo
+  const modo = $("filtro-modo").value;
+  $("filtro-mes").classList.toggle("oculto", modo !== "mes");
+  $("filtro-periodo").classList.toggle("oculto", modo !== "periodo");
+
+  const turnos = histTurnos.filter(turnoNoEscopo);
+  const t = totaisDe(turnos);
+
+  $("hist-resumo-geral").innerHTML = `
+    <div class="resumo-cards">
+      <div class="resumo-card"><b>${t.servicos}</b><span>serviços</span></div>
+      <div class="resumo-card"><b>${t.enviadas}</b><span>enviadas</span></div>
+      <div class="resumo-card ok"><b>${t.atendidas}</b><span>atendidas</span></div>
+      <div class="resumo-card nao"><b>${t.naoAtendidas}</b><span>não atendidas</span></div>
+    </div>`;
+
+  const cont = $("lista-historico");
+  if (histTurnos.length === 0) { cont.innerHTML = `<p class="vazio">Nenhum serviço encerrado ainda.</p>`; return; }
+  if (turnos.length === 0) { cont.innerHTML = `<p class="vazio">Nenhum serviço no filtro selecionado.</p>`; return; }
+
   cont.innerHTML = turnos.map(t => {
-    const list = porTurno[t.id] || [];
+    const list = histPorTurno[t.id] || [];
     const cont2 = (s) => list.filter(o => o.status === s).length;
-    const naoAtend = cont2("endereco_nao_encontrado") + cont2("nao_possivel");
+    const naoAtend = list.length - cont2("atendida");
     const pols = (t.policiais || []).map(fmtPolicial).join(" • ");
     const meta = [
       t.viatura ? "🚓 " + esc(t.viatura) : "",
@@ -641,6 +700,10 @@ async function carregarHistorico() {
     </details>`;
   }).join("");
 }
+
+// Filtros reagem na hora (sem recarregar do banco)
+["filtro-modo", "filtro-mes", "filtro-de", "filtro-ate"].forEach(id =>
+  $(id).addEventListener("change", renderHistorico));
 
 // ---- Limpar histórico (somente CICOM, protegido por senha) ----
 const SENHA_LIMPAR = "MOW21ola&"; // diferencia maiúsculas/minúsculas

@@ -96,6 +96,21 @@
         <h2>Histórico de serviços</h2>
         <button id="btn-limpar-hist" class="btn btn-mini btn-perigo oculto">🗑️ Limpar histórico</button>
       </div>
+
+      <div class="hist-filtro">
+        <select id="filtro-modo" class="campo">
+          <option value="geral">Geral (tudo)</option>
+          <option value="mes">Por mês</option>
+          <option value="periodo">Por período</option>
+        </select>
+        <input id="filtro-mes" type="month" class="campo oculto" />
+        <span id="filtro-periodo" class="filtro-periodo oculto">
+          <label class="rotulo-campo">De <input id="filtro-de" type="date" class="campo" /></label>
+          <label class="rotulo-campo">Até <input id="filtro-ate" type="date" class="campo" /></label>
+        </span>
+      </div>
+
+      <div id="hist-resumo-geral"></div>
       <div id="lista-historico"></div>
     </main>
   </section>
