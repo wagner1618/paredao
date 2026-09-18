@@ -228,39 +228,62 @@ function identificaRotulo(linha) {
   return null;
 }
 
-// Divide um texto colado em uma ou mais ocorrências e extrai os campos
-function parseOcorrencias(texto) {
-  const linhas = texto.split(/\r?\n/);
-  const registros = [];
-  let atual = null;
-  let campoAtual = null;
+function ehRotulo(linha, chave) {
+  const r = identificaRotulo(linha);
+  return !!r && r.chave === chave;
+}
 
-  const salva = () => { if (atual && Object.values(atual).some(v => v)) registros.push(atual); };
+// A cidade/bairro nem sempre vem com a etiqueta "Município/Bairro": muitas vezes
+// é só a 1ª linha. Por isso usamos "Endereço de incidente" (que aparece em toda
+// ocorrência) como âncora para separar vários blocos colados de uma vez.
+function separaPorIncidente(bloco) {
+  const lin = bloco.split(/\r?\n/).filter(l => l.trim());
+  const inc = [];
+  lin.forEach((l, i) => { if (ehRotulo(l, "enderecoIncidente")) inc.push(i); });
+  if (inc.length <= 1) return [bloco];
 
-  for (const linha of linhas) {
-    if (!linha.trim()) continue;
+  const inicios = [0];
+  for (let k = 1; k < inc.length; k++) {
+    let s = inc[k] - 1;                                   // linha do município (antes do "Endereço de incidente")
+    if (s - 1 >= 0 && ehRotulo(lin[s - 1], "municipioBairro")) s = s - 1; // inclui a etiqueta, se houver
+    inicios.push(s);
+  }
+  const recs = [];
+  for (let k = 0; k < inicios.length; k++) {
+    const fim = k + 1 < inicios.length ? inicios[k + 1] : lin.length;
+    recs.push(lin.slice(inicios[k], fim).join("\n"));
+  }
+  return recs;
+}
+
+// Extrai os campos de UMA ocorrência
+function parseUmRegistro(bloco) {
+  const lin = bloco.split(/\r?\n/).filter(l => l.trim());
+  const r = { municipioBairro:"", enderecoIncidente:"", enderecoReferencia:"", descricao:"", rawText: bloco.trim() };
+  let campo = null, vistoLabel = false;
+  const antes = [];
+  for (const linha of lin) {
     const rot = identificaRotulo(linha);
     if (rot) {
-      // Novo "Município" indica início de outra ocorrência
-      if (rot.chave === "municipioBairro" && atual && atual.municipioBairro) {
-        salva();
-        atual = null;
-      }
-      if (!atual) atual = { municipioBairro:"", enderecoIncidente:"", enderecoReferencia:"", descricao:"", rawText:"" };
-      campoAtual = rot.chave;
-      if (rot.resto) atual[campoAtual] = rot.resto;
-    } else if (atual && campoAtual) {
-      atual[campoAtual] += (atual[campoAtual] ? " " : "") + linha.trim();
-    } else {
-      // Texto solto antes de qualquer rótulo: trata como descrição de uma ocorrência avulsa
-      if (!atual) atual = { municipioBairro:"", enderecoIncidente:"", enderecoReferencia:"", descricao:"", rawText:"" };
-      atual.descricao += (atual.descricao ? " " : "") + linha.trim();
-      campoAtual = "descricao";
+      vistoLabel = true;
+      campo = rot.chave;
+      if (rot.resto) r[campo] = (r[campo] ? r[campo] + " " : "") + rot.resto;
+    } else if (!vistoLabel) {
+      antes.push(linha.trim());          // texto antes de qualquer etiqueta = cidade/bairro
+    } else if (campo) {
+      r[campo] += (r[campo] ? " " : "") + linha.trim();
     }
   }
-  salva();
-  registros.forEach(r => r.rawText = texto.trim());
-  return registros;
+  if (!r.municipioBairro && antes.length) r.municipioBairro = antes.join(" ");
+  return r;
+}
+
+// Divide um texto colado em uma ou mais ocorrências e extrai os campos
+function parseOcorrencias(texto) {
+  const blocos = texto.split(/\n\s*\n/).map(b => b.trim()).filter(Boolean);
+  const registros = [];
+  for (const b of blocos) separaPorIncidente(b).forEach(r => registros.push(parseUmRegistro(r)));
+  return registros.filter(r => r.municipioBairro || r.enderecoIncidente || r.descricao);
 }
 
 // -------- Botões do painel CICOM --------
