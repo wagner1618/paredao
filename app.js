@@ -40,6 +40,16 @@ const $ = (id) => document.getElementById(id);
 const el = (sel) => document.querySelector(sel);
 const els = (sel) => Array.from(document.querySelectorAll(sel));
 
+// Botão "olhinho" para mostrar/ocultar senha
+els(".olho").forEach(btn => btn.addEventListener("click", () => {
+  const inp = $(btn.dataset.alvo);
+  const mostrar = inp.type === "password";
+  inp.type = mostrar ? "text" : "password";
+  btn.textContent = mostrar ? "🙈" : "👁️";
+  btn.setAttribute("aria-label", mostrar ? "Ocultar senha" : "Mostrar senha");
+  inp.focus();
+}));
+
 // ============================================================
 //  LOGIN
 // ============================================================

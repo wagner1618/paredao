@@ -26,6 +26,12 @@ input,textarea,.campo{background:var(--card2);border:1px solid var(--linha);colo
 input:focus,textarea:focus{outline:2px solid var(--verde2)}
 .erro{color:#ff8080;font-size:14px;min-height:18px;margin:4px 0 0;text-align:center}
 
+/* Campo de senha com botão olhinho */
+.campo-senha{position:relative;display:block}
+.campo-senha input{width:100%;padding-right:44px}
+.olho{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:transparent;
+  border:none;cursor:pointer;font-size:18px;padding:4px 6px;line-height:1}
+
 /* ---------- Botões ---------- */
 .btn{background:var(--card2);color:var(--txt);border:1px solid var(--linha);
   border-radius:10px;padding:11px 14px;font-size:15px;cursor:pointer;font-family:inherit}
