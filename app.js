@@ -35,6 +35,25 @@ const STATUS = {
 const FUNCOES = ["Cmt", "Mot", "Mot/Cmt", "Patr 1", "Patr 2", "Patr 3"];
 const GRADUACOES = ["Cap PM", "Ten PM", "Subten PM", "Sgt PM", "Cb PM", "Sd PM"];
 
+// Preenche os seletores de hora/minuto (evita o relógio nativo do Android,
+// cujo botão "Definir" às vezes aparece cortado no celular).
+function preencherHoras() {
+  const opcoes = (n) => {
+    let html = '<option value="">--</option>';
+    for (let i = 0; i < n; i++) html += `<option>${String(i).padStart(2, "0")}</option>`;
+    return html;
+  };
+  ["turno-inicio-h", "turno-termino-h"].forEach(id => { $(id).innerHTML = opcoes(24); });
+  ["turno-inicio-m", "turno-termino-m"].forEach(id => { $(id).innerHTML = opcoes(60); });
+}
+preencherHoras();
+
+// Monta "HH:MM" a partir dos dois seletores (ou "" se incompleto).
+const lerHora = (idH, idM) => {
+  const h = $(idH).value, m = $(idM).value;
+  return (h && m) ? `${h}:${m}` : "";
+};
+
 // ---------- Atalhos ----------
 const $ = (id) => document.getElementById(id);
 const el = (sel) => document.querySelector(sel);
@@ -236,8 +255,8 @@ async function assumirServico() {
     ativo: true,
     viatura: $("turno-viatura").value.trim(),
     km: $("turno-km").value.trim(),
-    horaInicio: $("turno-inicio").value,     // "HH:MM" informado pela guarnição
-    horaTermino: $("turno-termino").value,   // "HH:MM" informado pela guarnição
+    horaInicio: lerHora("turno-inicio-h", "turno-inicio-m"),     // "HH:MM" informado pela guarnição
+    horaTermino: lerHora("turno-termino-h", "turno-termino-m"),  // "HH:MM" informado pela guarnição
     observacoes: $("turno-obs").value.trim(),
     policiais,
     inicio: serverTimestamp(),               // usado só para ordenar/datar no histórico

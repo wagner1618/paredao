@@ -26,6 +26,11 @@ input,textarea,.campo{background:var(--card2);border:1px solid var(--linha);colo
 input:focus,textarea:focus{outline:2px solid var(--verde2)}
 .erro{color:#ff8080;font-size:14px;min-height:18px;margin:4px 0 0;text-align:center}
 
+/* Campo de hora (dois seletores hora:minuto, sem relógio nativo) */
+.campo-hora{display:flex;align-items:center;gap:6px}
+.campo-hora .campo{width:auto;flex:1;min-width:0;text-align:center}
+.hora-sep{font-weight:600;color:var(--txt2)}
+
 /* Campo de senha com botão olhinho */
 .campo-senha{position:relative;display:block}
 .campo-senha input{width:100%;padding-right:44px}

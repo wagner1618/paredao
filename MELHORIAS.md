@@ -3,7 +3,7 @@
 Documento de apoio para retomar o projeto mais à frente. Resume **como está hoje**,
 as **decisões tomadas** e uma **lista de melhorias** possíveis.
 
-_Última atualização: 17/09/2026._
+_Última atualização: 18/09/2026._
 
 ---
 
@@ -52,6 +52,26 @@ _Última atualização: 17/09/2026._
 | `firebase-config.js` | Config do Firebase + lista de e-mails do CICOM |
 | `firestore.rules` | Regras de segurança do banco |
 | `README.md` | Guia de instalação |
+
+### Cache busting — IMPORTANTE ao publicar
+Os celulares guardam `styles.css` e `app.js` em cache e podem continuar mostrando
+a **versão antiga** depois de uma publicação. Para evitar isso, o `index.html`
+carrega esses arquivos com um número de versão:
+
+```html
+<link rel="stylesheet" href="styles.css?v=2" />
+<script type="module" src="app.js?v=2"></script>
+```
+
+**Toda vez que alterar `styles.css` ou `app.js`, aumente o número nos dois lugares**
+(`?v=3`, depois `?v=4`, ...). Isso obriga todos os navegadores a baixar a versão
+nova, sem ninguém precisar limpar cache no celular.
+
+- O `firebase-config.js` é importado dentro do `app.js` e **não** tem versão
+  (quase nunca muda). Se um dia precisar forçar atualização dele, aplicar o mesmo
+  esquema `?v=` no `import`.
+- Se ainda assim aparecer a versão velha em um celular, forçar uma vez: aba
+  anônima ou limpar o cache do site no Chrome.
 
 ---
 

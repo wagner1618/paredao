@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
   <meta name="theme-color" content="#0b3d2e" />
   <title>Operação Paredão</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=2" />
 </head>
 <body>
 
@@ -84,10 +84,18 @@
         </div>
         <div class="grade2">
           <label class="rotulo-campo">Início
-            <input id="turno-inicio" type="time" class="campo" />
+            <span class="campo-hora">
+              <select id="turno-inicio-h" class="campo" aria-label="Hora de início"></select>
+              <span class="hora-sep">:</span>
+              <select id="turno-inicio-m" class="campo" aria-label="Minuto de início"></select>
+            </span>
           </label>
           <label class="rotulo-campo">Término
-            <input id="turno-termino" type="time" class="campo" />
+            <span class="campo-hora">
+              <select id="turno-termino-h" class="campo" aria-label="Hora de término"></select>
+              <span class="hora-sep">:</span>
+              <select id="turno-termino-m" class="campo" aria-label="Minuto de término"></select>
+            </span>
           </label>
         </div>
         <div id="lista-policiais"></div>
@@ -187,6 +195,6 @@
     </div>
   </div>
 
-  <script type="module" src="app.js"></script>
+  <script type="module" src="app.js?v=2"></script>
 </body>
 </html>
