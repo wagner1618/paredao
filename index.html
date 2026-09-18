@@ -93,6 +93,13 @@
         <div id="lista-policiais"></div>
         <button id="btn-add-policial" class="btn btn-mini">+ Adicionar policial</button>
         <textarea id="turno-obs" class="campo" rows="2" placeholder="Observações (opcional)"></textarea>
+        <label class="rotulo-campo">Senha para assumir
+          <span class="campo-senha">
+            <input id="turno-senha" type="password" class="campo" placeholder="Senha" autocomplete="off" />
+            <button type="button" class="olho" data-alvo="turno-senha" aria-label="Mostrar senha">👁️</button>
+          </span>
+        </label>
+        <p id="assumir-erro" class="erro"></p>
         <button id="btn-assumir" class="btn btn-primario">Assumir serviço</button>
       </div>
 

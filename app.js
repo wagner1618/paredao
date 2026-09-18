@@ -225,7 +225,12 @@ async function assumirServico() {
     nome: l.querySelector(".pol-nome").value.trim()
   })).filter(p => p.nome);
 
-  if (policiais.length === 0) { toast("Informe ao menos um policial."); return; }
+  if (policiais.length === 0) { $("assumir-erro").textContent = "Informe ao menos um policial."; return; }
+  if ($("turno-senha").value.trim().toLowerCase() !== SENHA_ASSUMIR) {
+    $("assumir-erro").textContent = "Senha incorreta.";
+    return;
+  }
+  $("assumir-erro").textContent = "";
 
   await addDoc(collection(db, "turnos"), {
     ativo: true,
@@ -242,7 +247,8 @@ async function assumirServico() {
   toast("Serviço assumido. Bom trabalho!");
 }
 
-// Senha exigida para encerrar o serviço (evita encerramento acidental)
+// Senha exigida para assumir e para encerrar o serviço
+const SENHA_ASSUMIR = "paredao";
 const SENHA_ENCERRAR = "paredao";
 
 function abrirModalEncerrar() {
