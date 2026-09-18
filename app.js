@@ -370,7 +370,8 @@ function parseUmRegistro(bloco) {
       r[campo] += (r[campo] ? " " : "") + linha.trim();
     }
   }
-  if (!r.municipioBairro && antes.length) r.municipioBairro = antes.join(" ");
+  // Título curto: se não veio a etiqueta, usa só a 1ª linha (não o texto todo).
+  if (!r.municipioBairro && antes.length) r.municipioBairro = antes[0];
   return r;
 }
 
