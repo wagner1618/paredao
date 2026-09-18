@@ -1,0 +1,17 @@
+rules_version = '2';
+// Regras do Firestore para a Operação Paredão.
+// Cole isto em: Firebase Console > Firestore Database > aba "Regras" > Publicar.
+//
+// Nível de segurança: qualquer usuário AUTENTICADO (CICOM ou Guarnição) pode
+// ler e escrever. Como só existem os logins que VOCÊ criar no Authentication,
+// ninguém de fora consegue acessar. É simples e adequado para uma equipe fechada.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /ocorrencias/{doc} {
+      allow read, write: if request.auth != null;
+    }
+    match /turnos/{doc} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

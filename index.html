@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+  <meta name="theme-color" content="#0b3d2e" />
+  <title>Operação Paredão</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ============ TELA DE LOGIN ============ -->
+  <section id="tela-login" class="tela">
+    <div class="login-box">
+      <div class="brasao">🛡️</div>
+      <h1>Operação Paredão</h1>
+      <p class="sub">Controle de ocorrências — PMBA</p>
+      <form id="form-login" autocomplete="on">
+        <label>E-mail
+          <input type="email" id="login-email" required placeholder="seu-login@paredao" />
+        </label>
+        <label>Senha
+          <input type="password" id="login-senha" required placeholder="••••••••" />
+        </label>
+        <button type="submit" class="btn btn-primario">Entrar</button>
+        <p id="login-erro" class="erro"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- ============ APLICATIVO ============ -->
+  <section id="tela-app" class="tela oculto">
+    <header class="topo">
+      <div class="topo-esq">
+        <strong>Operação Paredão</strong>
+        <span id="badge-perfil" class="badge"></span>
+      </div>
+      <div class="topo-dir">
+        <span id="usuario-atual" class="usuario"></span>
+        <button id="btn-sair" class="btn btn-mini">Sair</button>
+      </div>
+    </header>
+
+    <!-- Barra da guarnição / turno ativo -->
+    <div id="barra-turno" class="barra-turno"></div>
+
+    <nav class="abas">
+      <button class="aba ativa" data-aba="board">Ocorrências</button>
+      <button class="aba" data-aba="historico">Histórico</button>
+    </nav>
+
+    <!-- ===== ABA OCORRÊNCIAS ===== -->
+    <main id="aba-board" class="conteudo">
+
+      <!-- Caixa do CICOM para lançar ocorrências -->
+      <div id="painel-cicom" class="painel oculto">
+        <h2>Lançar ocorrência</h2>
+        <p class="dica">Cole o texto do WhatsApp (pode colar vários de uma vez). O sistema separa os campos sozinho.</p>
+        <textarea id="entrada-colar" rows="7" placeholder="Município/Bairro&#10;VITÓRIA DA CONQUISTA/ALTO MARON&#10;Endereço de incidente&#10;RUA ...&#10;Endereço de referência&#10;...&#10;Descrição&#10;..."></textarea>
+        <div class="linha-botoes">
+          <button id="btn-previa" class="btn">Pré-visualizar</button>
+          <button id="btn-lancar" class="btn btn-primario">Lançar</button>
+        </div>
+        <div id="previa" class="previa oculto"></div>
+      </div>
+
+      <!-- Botão de assumir serviço (guarnição, quando não há turno ativo) -->
+      <div id="painel-assumir" class="painel oculto">
+        <h2>Assumir serviço</h2>
+        <p class="dica">Informe a guarnição que vai atuar. Isso aparece para o CICOM.</p>
+        <input id="turno-viatura" class="campo" placeholder="Viatura / prefixo (ex.: RP-1234)" />
+        <div id="lista-policiais"></div>
+        <button id="btn-add-policial" class="btn btn-mini">+ Adicionar policial</button>
+        <button id="btn-assumir" class="btn btn-primario">Assumir serviço</button>
+      </div>
+
+      <!-- Colunas de status -->
+      <div id="colunas"></div>
+    </main>
+
+    <!-- ===== ABA HISTÓRICO ===== -->
+    <main id="aba-historico" class="conteudo oculto">
+      <h2>Histórico de serviços</h2>
+      <div id="lista-historico"></div>
+    </main>
+  </section>
+
+  <div id="toast" class="toast oculto"></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

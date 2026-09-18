@@ -1,0 +1,137 @@
+:root{
+  --verde:#0b3d2e; --verde2:#12563f; --amarelo:#e8b100;
+  --bg:#0f1115; --card:#1b1f27; --card2:#232833; --linha:#2c3340;
+  --txt:#e8ebf0; --txt2:#9aa4b2; --ok:#1f9d55; --perigo:#c0392b; --neutro:#3a4a63;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:var(--bg); color:var(--txt); font-size:16px;
+}
+.oculto{display:none !important}
+
+/* ---------- Login ---------- */
+#tela-login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+  background:radial-gradient(1200px 600px at 50% -10%, #143d2e 0%, var(--bg) 60%);}
+.login-box{background:var(--card);border:1px solid var(--linha);border-radius:16px;
+  padding:32px 28px;width:100%;max-width:380px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.4)}
+.brasao{font-size:44px}
+.login-box h1{margin:6px 0 2px;font-size:22px}
+.login-box .sub{margin:0 0 20px;color:var(--txt2);font-size:14px}
+#form-login{display:flex;flex-direction:column;gap:12px;text-align:left}
+label{font-size:13px;color:var(--txt2);display:flex;flex-direction:column;gap:5px}
+input,textarea,.campo{background:var(--card2);border:1px solid var(--linha);color:var(--txt);
+  border-radius:10px;padding:12px;font-size:16px;width:100%;font-family:inherit}
+input:focus,textarea:focus{outline:2px solid var(--verde2)}
+.erro{color:#ff8080;font-size:14px;min-height:18px;margin:4px 0 0;text-align:center}
+
+/* ---------- Botões ---------- */
+.btn{background:var(--card2);color:var(--txt);border:1px solid var(--linha);
+  border-radius:10px;padding:11px 14px;font-size:15px;cursor:pointer;font-family:inherit}
+.btn:hover{filter:brightness(1.12)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-primario{background:var(--amarelo);color:#241c00;border-color:var(--amarelo);font-weight:700}
+.btn-ok{background:var(--ok);border-color:var(--ok);color:#fff;font-weight:600}
+.btn-perigo{background:var(--perigo);border-color:var(--perigo);color:#fff}
+.btn-neutro{background:var(--neutro);border-color:var(--neutro);color:#fff}
+.btn-mini{padding:7px 10px;font-size:13px}
+.btn-apagar{background:transparent;color:#ff8080;border-color:#5a2a2a}
+
+/* ---------- Topo ---------- */
+.topo{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;
+  gap:10px;padding:12px 16px;background:var(--verde);border-bottom:1px solid #08251b}
+.topo-esq{display:flex;align-items:center;gap:10px}
+.topo-dir{display:flex;align-items:center;gap:10px}
+.usuario{color:#cfe6da;font-size:13px;max-width:38vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.badge{font-size:11px;font-weight:800;padding:3px 8px;border-radius:20px;letter-spacing:.5px}
+.badge-cicom{background:#2b3ea5;color:#fff}
+.badge-guarnicao{background:var(--amarelo);color:#241c00}
+
+/* ---------- Barra de turno ---------- */
+.barra-turno{padding:10px 16px;background:var(--card);border-bottom:1px solid var(--linha);
+  display:flex;justify-content:space-between;align-items:center;gap:10px}
+.barra-turno.ativa{border-left:4px solid var(--ok)}
+.turno-info{display:flex;align-items:center;gap:10px}
+.turno-dot{width:12px;height:12px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok)}
+.turno-dot.off{background:#666;box-shadow:none}
+.turno-pols{font-size:13px;color:var(--txt2)}
+.turno-vazio strong{color:var(--txt2);font-weight:600}
+
+/* ---------- Abas ---------- */
+.abas{display:flex;gap:4px;padding:10px 16px 0;background:var(--bg)}
+.aba{background:transparent;border:none;color:var(--txt2);padding:10px 16px;font-size:15px;cursor:pointer;border-bottom:3px solid transparent}
+.aba.ativa{color:var(--txt);border-bottom-color:var(--amarelo);font-weight:600}
+
+/* ---------- Conteúdo ---------- */
+.conteudo{padding:16px;max-width:1100px;margin:0 auto}
+.painel{background:var(--card);border:1px solid var(--linha);border-radius:14px;padding:16px;margin-bottom:18px}
+.painel h2{margin:0 0 6px;font-size:18px}
+.dica{color:var(--txt2);font-size:13px;margin:0 0 10px}
+.linha-botoes{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+textarea{resize:vertical}
+
+.previa{margin-top:14px;border-top:1px dashed var(--linha);padding-top:12px}
+.previa-card{background:var(--card2);border-radius:10px;padding:10px;margin-bottom:8px;font-size:13px}
+.previa-card span{color:var(--txt2)}
+
+/* Painel assumir */
+.policial-linha{display:grid;grid-template-columns:70px 1fr 110px 40px;gap:6px;margin-bottom:6px}
+.policial-linha .btn-remove{padding:0}
+#turno-viatura{margin-bottom:10px}
+#btn-add-policial{margin:4px 0 12px}
+
+/* ---------- Colunas ---------- */
+#colunas{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.titulo-col{font-size:15px;margin:0 0 10px;display:flex;align-items:center;gap:8px}
+.contador{background:var(--card2);border-radius:20px;padding:1px 9px;font-size:13px;color:var(--txt2)}
+.lista{display:flex;flex-direction:column;gap:10px;min-height:40px}
+.vazio{color:var(--txt2);font-size:14px;padding:8px}
+
+/* ---------- Cards ---------- */
+.card{background:var(--card);border:1px solid var(--linha);border-radius:12px;padding:12px;
+  border-left:5px solid var(--linha)}
+.card.st-pendente{border-left-color:var(--amarelo)}
+.card.st-atendida{border-left-color:var(--ok)}
+.card.st-naoenc{border-left-color:#4a90d9}
+.card.st-naopos{border-left-color:var(--perigo)}
+.card.arrastando{opacity:.4}
+.card[draggable=true]{cursor:grab}
+.card-topo{display:flex;align-items:center;gap:8px}
+.pos{background:var(--verde2);color:#fff;font-weight:700;font-size:12px;border-radius:8px;padding:2px 7px;flex-shrink:0}
+.mun{flex:1;font-size:15px}
+.setas{display:flex;flex-direction:column;gap:2px}
+.btn-seta{background:var(--card2);border:1px solid var(--linha);color:var(--txt);border-radius:6px;
+  width:34px;height:24px;line-height:1;cursor:pointer;font-size:12px}
+.btn-seta:disabled{opacity:.25}
+.card-corpo{margin:8px 0;font-size:14px;line-height:1.5}
+.card-corpo span{color:var(--txt2)}
+.link-mapa{display:inline-block;margin-top:6px;color:#7db8ff;text-decoration:none;font-size:13px}
+.card-acoes{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.card-acoes .btn{flex:1;min-width:120px}
+.finalizada{opacity:.9}
+.finalizada .card-acoes .btn{flex:0}
+.fin-meta{color:var(--txt2);font-size:12px;margin-top:4px}
+.tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;color:#fff;flex-shrink:0}
+.tag.st-atendida{background:var(--ok)}
+.tag.st-naoenc{background:#4a90d9}
+.tag.st-naopos{background:var(--perigo)}
+.tag.st-pendente{background:var(--amarelo);color:#241c00}
+
+/* ---------- Histórico ---------- */
+.hist-item{background:var(--card);border:1px solid var(--linha);border-radius:12px;padding:10px 14px;margin-bottom:10px}
+.hist-item summary{cursor:pointer;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.hist-resumo{color:var(--txt2);font-size:13px;margin-left:auto}
+.hist-pols{color:var(--txt2);font-size:13px;margin:8px 0}
+.hist-oc{font-size:13px;padding:5px 0;border-top:1px solid var(--linha);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* ---------- Toast ---------- */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#000;color:#fff;
+  padding:12px 20px;border-radius:30px;font-size:14px;z-index:50;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+
+/* ---------- Mobile ---------- */
+@media (max-width:720px){
+  #colunas{grid-template-columns:1fr}
+  .usuario{max-width:28vw}
+  .policial-linha{grid-template-columns:60px 1fr 90px 34px}
+}
