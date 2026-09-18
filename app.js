@@ -132,7 +132,7 @@ function renderBarraTurno() {
     `;
     barra.classList.add("ativa");
     const be = $("btn-encerrar");
-    if (be) be.addEventListener("click", encerrarServico);
+    if (be) be.addEventListener("click", abrirModalEncerrar);
   } else {
     barra.classList.remove("ativa");
     barra.innerHTML = `<div class="turno-info turno-vazio">
@@ -216,10 +216,29 @@ async function assumirServico() {
   toast("Serviço assumido. Bom trabalho!");
 }
 
-async function encerrarServico() {
-  if (!turnoAtivo) return;
-  if (!confirm("Encerrar o serviço? As ocorrências vão para o histórico e o quadro fica limpo.")) return;
+// Senha exigida para encerrar o serviço (evita encerramento acidental)
+const SENHA_ENCERRAR = "paredao";
 
+function abrirModalEncerrar() {
+  if (!turnoAtivo) return;
+  $("encerrar-senha").value = "";
+  $("encerrar-erro").textContent = "";
+  $("modal-encerrar").classList.remove("oculto");
+  $("encerrar-senha").focus();
+}
+
+function fecharModalEncerrar() {
+  $("modal-encerrar").classList.add("oculto");
+}
+
+async function confirmarEncerramento() {
+  if (!turnoAtivo) { fecharModalEncerrar(); return; }
+  const senha = $("encerrar-senha").value.trim().toLowerCase();
+  if (senha !== SENHA_ENCERRAR) {
+    $("encerrar-erro").textContent = "Senha incorreta.";
+    $("encerrar-senha").select();
+    return;
+  }
   const batch = writeBatch(db);
   // Arquiva as ocorrências do quadro e carimba com o turno
   const snap = await getDocs(query(collection(db, "ocorrencias"), where("arquivada", "==", false)));
@@ -230,8 +249,14 @@ async function encerrarServico() {
   // informado pela guarnição ao assumir (turnoAtivo.horaTermino).
   batch.update(doc(db, "turnos", turnoAtivo.id), { ativo: false });
   await batch.commit();
+  fecharModalEncerrar();
   toast("Serviço encerrado.");
 }
+
+$("encerrar-cancelar").addEventListener("click", fecharModalEncerrar);
+$("encerrar-confirmar").addEventListener("click", confirmarEncerramento);
+$("encerrar-senha").addEventListener("keydown", (e) => { if (e.key === "Enter") confirmarEncerramento(); });
+$("modal-encerrar").addEventListener("click", (e) => { if (e.target.id === "modal-encerrar") fecharModalEncerrar(); });
 
 // ============================================================
 //  OCORRÊNCIAS
