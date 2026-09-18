@@ -86,6 +86,7 @@ $("form-login").addEventListener("submit", async (e) => {
 $("btn-sair").addEventListener("click", () => signOut(auth));
 
 onAuthStateChanged(auth, (user) => {
+  $("tela-carregando").classList.add("oculto");   // Firebase respondeu: some o "Carregando…"
   if (user) {
     usuario = user;
     perfil = EMAILS_CICOM.map(e => e.toLowerCase()).includes(user.email.toLowerCase())

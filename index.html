@@ -5,12 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
   <meta name="theme-color" content="#0b3d2e" />
   <title>Operação Paredão</title>
-  <link rel="stylesheet" href="styles.css?v=7" />
+  <link rel="stylesheet" href="styles.css?v=8" />
 </head>
 <body>
 
+  <!-- ============ TELA DE CARREGAMENTO (evita o "pisca" do login) ============ -->
+  <section id="tela-carregando" class="tela">
+    <div class="login-box">
+      <div class="brasao">🛡️</div>
+      <p class="sub">Carregando…</p>
+    </div>
+  </section>
+
   <!-- ============ TELA DE LOGIN ============ -->
-  <section id="tela-login" class="tela">
+  <section id="tela-login" class="tela oculto">
     <div class="login-box">
       <div class="brasao">🛡️</div>
       <h1>Operação Paredão</h1>
@@ -195,6 +203,6 @@
     </div>
   </div>
 
-  <script type="module" src="app.js?v=7"></script>
+  <script type="module" src="app.js?v=8"></script>
 </body>
 </html>
