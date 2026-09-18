@@ -154,6 +154,13 @@ select.campo{appearance:none;-webkit-appearance:none}
 .resumo-card.ok b{color:#3ddc84}
 .resumo-card.nao{border-top-color:var(--perigo)}
 .resumo-card.nao b{color:#ff8080}
+.resumo-titulo{font-size:13px;color:var(--txt2);margin:0 0 8px;text-transform:uppercase;letter-spacing:.5px}
+.resumo-status{grid-template-columns:repeat(4,1fr)}
+.resumo-card.st-atendida{border-top-color:var(--ok)}
+.resumo-card.st-pendente{border-top-color:var(--amarelo)}
+.resumo-card.st-naoenc{border-top-color:#4a90d9}
+.resumo-card.st-naopos{border-top-color:var(--perigo)}
+.resumo-status .resumo-card b{font-size:22px}
 .hist-resumo{color:var(--txt2);font-size:13px;margin-left:auto}
 .hist-meta{font-size:13px;margin:8px 0 2px}
 .hist-pols{color:var(--txt2);font-size:13px;margin:6px 0}
@@ -189,5 +196,6 @@ select.campo{appearance:none;-webkit-appearance:none}
   .barra-turno{flex-direction:column;align-items:flex-start}
   .turno-lado{width:100%;justify-content:space-between}
   .resumo-cards{grid-template-columns:repeat(2,1fr)}
+  .resumo-status{grid-template-columns:repeat(2,1fr)}
   .hist-filtro .campo{flex:1}
 }

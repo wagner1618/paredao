@@ -643,13 +643,14 @@ function turnoNoEscopo(t) {
 }
 
 function totaisDe(turnos) {
-  let enviadas = 0, atendidas = 0;
+  const c = { atendida: 0, endereco_nao_encontrado: 0, nao_possivel: 0, pendente: 0 };
+  let enviadas = 0;
   turnos.forEach(t => {
     const list = histPorTurno[t.id] || [];
     enviadas += list.length;
-    atendidas += list.filter(o => o.status === "atendida").length;
+    list.forEach(o => { if (c[o.status] !== undefined) c[o.status]++; });
   });
-  return { servicos: turnos.length, enviadas, atendidas, naoAtendidas: enviadas - atendidas };
+  return { servicos: turnos.length, enviadas, ...c, naoAtendidas: enviadas - c.atendida };
 }
 
 function renderHistorico() {
@@ -665,8 +666,15 @@ function renderHistorico() {
     <div class="resumo-cards">
       <div class="resumo-card"><b>${t.servicos}</b><span>serviços</span></div>
       <div class="resumo-card"><b>${t.enviadas}</b><span>enviadas</span></div>
-      <div class="resumo-card ok"><b>${t.atendidas}</b><span>atendidas</span></div>
+      <div class="resumo-card ok"><b>${t.atendida}</b><span>atendidas</span></div>
       <div class="resumo-card nao"><b>${t.naoAtendidas}</b><span>não atendidas</span></div>
+    </div>
+    <div class="resumo-titulo">Detalhamento por status</div>
+    <div class="resumo-cards resumo-status">
+      <div class="resumo-card st-atendida"><b>${t.atendida}</b><span>Atendida</span></div>
+      <div class="resumo-card st-pendente"><b>${t.pendente}</b><span>Pendente</span></div>
+      <div class="resumo-card st-naoenc"><b>${t.endereco_nao_encontrado}</b><span>End. não encontrado</span></div>
+      <div class="resumo-card st-naopos"><b>${t.nao_possivel}</b><span>Não será possível</span></div>
     </div>`;
 
   const cont = $("lista-historico");
