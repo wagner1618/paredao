@@ -83,10 +83,24 @@ function entrarNoApp() {
   const badge = $("badge-perfil");
   badge.textContent = perfil === "cicom" ? "CICOM" : "GUARNIÇÃO";
   badge.className = "badge " + (perfil === "cicom" ? "badge-cicom" : "badge-guarnicao");
-  $("painel-cicom").classList.toggle("oculto", perfil !== "cicom");
+  // O painel do CICOM só aparece com serviço aberto — controlado em atualizarPainelCicom()
+  $("painel-cicom").classList.add("oculto");
+  $("cicom-aguardando").classList.add("oculto");
   $("btn-limpar-hist").classList.toggle("oculto", perfil !== "cicom");
   ouvirTurno();
   ouvirOcorrencias();
+}
+
+// CICOM só lança ocorrências depois que a guarnição abre o serviço
+function atualizarPainelCicom() {
+  if (perfil !== "cicom") {
+    $("painel-cicom").classList.add("oculto");
+    $("cicom-aguardando").classList.add("oculto");
+    return;
+  }
+  const temServico = !!turnoAtivo;
+  $("painel-cicom").classList.toggle("oculto", !temServico);
+  $("cicom-aguardando").classList.toggle("oculto", temServico);
 }
 
 function sairDoApp() {
@@ -154,6 +168,7 @@ function renderBarraTurno() {
     painelAssumir.classList.toggle("oculto", perfil !== "guarnicao");
     if (perfil === "guarnicao" && !painelAssumir.dataset.pronto) prepararPainelAssumir();
   }
+  atualizarPainelCicom();
 }
 
 function opcoes(lista) {
@@ -398,6 +413,7 @@ $("btn-previa").addEventListener("click", () => {
 });
 
 $("btn-lancar").addEventListener("click", async () => {
+  if (!turnoAtivo) { toast("Aguardando a guarnição abrir o serviço."); return; }
   const regs = parseOcorrencias($("entrada-colar").value);
   if (regs.length === 0) { toast("Nada reconhecido para lançar."); return; }
 

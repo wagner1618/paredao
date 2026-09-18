@@ -86,6 +86,10 @@ input:focus,textarea:focus{outline:2px solid var(--verde2)}
 .linha-botoes{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
 textarea{resize:vertical}
 
+.aguardando{text-align:center;border-style:dashed}
+.aguardando h2{margin:6px 0 4px}
+.aguardando-icone{font-size:40px}
+
 .previa{margin-top:14px;border-top:1px dashed var(--linha);padding-top:12px}
 .previa-card{background:var(--card2);border-radius:10px;padding:10px;margin-bottom:8px;font-size:13px}
 .previa-card span{color:var(--txt2)}
