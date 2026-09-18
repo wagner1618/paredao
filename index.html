@@ -68,9 +68,21 @@
       <div id="painel-assumir" class="painel oculto">
         <h2>Assumir serviço</h2>
         <p class="dica">Informe a guarnição que vai atuar. Isso aparece para o CICOM.</p>
-        <input id="turno-viatura" class="campo" placeholder="Viatura / prefixo (ex.: RP-1234)" />
+        <div class="grade2">
+          <input id="turno-viatura" class="campo" placeholder="Viatura / prefixo (ex.: RP-1234)" />
+          <input id="turno-km" class="campo" inputmode="numeric" placeholder="KM da viatura" />
+        </div>
+        <div class="grade2">
+          <label class="rotulo-campo">Início
+            <input id="turno-inicio" type="time" class="campo" />
+          </label>
+          <label class="rotulo-campo">Término
+            <input id="turno-termino" type="time" class="campo" />
+          </label>
+        </div>
         <div id="lista-policiais"></div>
         <button id="btn-add-policial" class="btn btn-mini">+ Adicionar policial</button>
+        <textarea id="turno-obs" class="campo" rows="2" placeholder="Observações (opcional)"></textarea>
         <button id="btn-assumir" class="btn btn-primario">Assumir serviço</button>
       </div>
 

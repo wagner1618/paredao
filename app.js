@@ -31,6 +31,10 @@ const STATUS = {
   nao_possivel:            { rotulo: "Não será possível",       classe: "st-naopos" }
 };
 
+// Opções das listas suspensas da guarnição
+const FUNCOES = ["Cmt", "Mot", "Mot/Cmt", "Patr 1", "Patr 2", "Patr 3"];
+const GRADUACOES = ["Cap PM", "Ten PM", "Subten PM", "Sgt PM", "Cb PM", "Sd PM"];
+
 // ---------- Atalhos ----------
 const $ = (id) => document.getElementById(id);
 const el = (sel) => document.querySelector(sel);
@@ -103,19 +107,28 @@ function renderBarraTurno() {
 
   if (turnoAtivo) {
     painelAssumir.classList.add("oculto");
-    const pols = (turnoAtivo.policiais || []).map(p =>
-      `${p.graduacao ? p.graduacao + " " : ""}${p.nome}${p.matricula ? " ("+p.matricula+")" : ""}`
-    ).join(" • ");
+    const pols = (turnoAtivo.policiais || []).map(fmtPolicial).join(" • ");
+    const t = turnoAtivo;
+    const detalhes = [
+      t.viatura ? "🚓 " + esc(t.viatura) : "",
+      t.km ? "KM " + esc(t.km) : "",
+      (t.horaInicio || t.horaTermino) ? `⏱ ${esc(t.horaInicio || "?")}–${esc(t.horaTermino || "?")}` : ""
+    ].filter(Boolean).join(" · ");
     barra.innerHTML = `
       <div class="turno-info">
         <span class="turno-dot"></span>
         <div>
-          <strong>Guarnição em serviço${turnoAtivo.viatura ? " — " + esc(turnoAtivo.viatura) : ""}</strong>
+          <strong>Guarnição em serviço</strong>
+          ${detalhes ? `<div class="turno-det">${detalhes}</div>` : ""}
           <div class="turno-pols">${esc(pols) || "—"}</div>
+          ${t.observacoes ? `<div class="turno-obs">📝 ${esc(t.observacoes)}</div>` : ""}
         </div>
       </div>
-      ${perfil === "guarnicao"
-        ? `<button id="btn-encerrar" class="btn btn-mini btn-perigo">Encerrar serviço</button>` : ""}
+      <div class="turno-lado">
+        ${htmlContagem()}
+        ${perfil === "guarnicao"
+          ? `<button id="btn-encerrar" class="btn btn-mini btn-perigo">Encerrar serviço</button>` : ""}
+      </div>
     `;
     barra.classList.add("ativa");
     const be = $("btn-encerrar");
@@ -132,6 +145,33 @@ function renderBarraTurno() {
   }
 }
 
+function opcoes(lista) {
+  return `<option value="">—</option>` + lista.map(o => `<option value="${o}">${o}</option>`).join("");
+}
+
+// "Cmt Ten PM João" (ignora campos vazios)
+function fmtPolicial(p) {
+  return [p.funcao, p.graduacao, p.nome].filter(Boolean).join(" ");
+}
+
+// Contagem do serviço em andamento
+function contagem() {
+  const eh = (s) => ocorrencias.filter(o => o.status === s).length;
+  return {
+    enviadas: ocorrencias.length,
+    atendidas: eh("atendida"),
+    naoAtendidas: eh("endereco_nao_encontrado") + eh("nao_possivel")
+  };
+}
+function htmlContagem() {
+  const c = contagem();
+  return `<div class="contagem">
+    <span class="cont-item"><b>${c.enviadas}</b> enviadas</span>
+    <span class="cont-item ok"><b>${c.atendidas}</b> atendidas</span>
+    <span class="cont-item nao"><b>${c.naoAtendidas}</b> não atend.</span>
+  </div>`;
+}
+
 function prepararPainelAssumir() {
   $("painel-assumir").dataset.pronto = "1";
   const lista = $("lista-policiais");
@@ -139,23 +179,23 @@ function prepararPainelAssumir() {
     const div = document.createElement("div");
     div.className = "policial-linha";
     div.innerHTML = `
-      <input class="campo pol-grad" placeholder="Grad." />
+      <select class="campo pol-func">${opcoes(FUNCOES)}</select>
+      <select class="campo pol-grad">${opcoes(GRADUACOES)}</select>
       <input class="campo pol-nome" placeholder="Nome" />
-      <input class="campo pol-mat" placeholder="Matrícula" />
       <button class="btn btn-mini btn-remove" title="Remover">✕</button>`;
     div.querySelector(".btn-remove").addEventListener("click", () => div.remove());
     lista.appendChild(div);
   };
-  addLinha(); addLinha(); addLinha(); // começa com 3 linhas
+  addLinha(); addLinha(); addLinha(); addLinha(); // começa com 4 linhas
   $("btn-add-policial").addEventListener("click", addLinha);
   $("btn-assumir").addEventListener("click", assumirServico);
 }
 
 async function assumirServico() {
   const policiais = els(".policial-linha").map(l => ({
-    graduacao: l.querySelector(".pol-grad").value.trim(),
-    nome: l.querySelector(".pol-nome").value.trim(),
-    matricula: l.querySelector(".pol-mat").value.trim()
+    funcao: l.querySelector(".pol-func").value,
+    graduacao: l.querySelector(".pol-grad").value,
+    nome: l.querySelector(".pol-nome").value.trim()
   })).filter(p => p.nome);
 
   if (policiais.length === 0) { toast("Informe ao menos um policial."); return; }
@@ -163,8 +203,12 @@ async function assumirServico() {
   await addDoc(collection(db, "turnos"), {
     ativo: true,
     viatura: $("turno-viatura").value.trim(),
+    km: $("turno-km").value.trim(),
+    horaInicio: $("turno-inicio").value,     // "HH:MM" informado pela guarnição
+    horaTermino: $("turno-termino").value,   // "HH:MM" informado pela guarnição
+    observacoes: $("turno-obs").value.trim(),
     policiais,
-    inicio: serverTimestamp(),
+    inicio: serverTimestamp(),               // usado só para ordenar/datar no histórico
     fim: null,
     criadoPor: usuario.email
   });
@@ -181,7 +225,9 @@ async function encerrarServico() {
   snap.forEach(d => batch.update(doc(db, "ocorrencias", d.id), {
     arquivada: true, turnoId: turnoAtivo.id
   }));
-  batch.update(doc(db, "turnos", turnoAtivo.id), { ativo: false, fim: serverTimestamp() });
+  // Não gravamos a hora real do encerramento: o término é o horário
+  // informado pela guarnição ao assumir (turnoAtivo.horaTermino).
+  batch.update(doc(db, "turnos", turnoAtivo.id), { ativo: false });
   await batch.commit();
   toast("Serviço encerrado.");
 }
@@ -351,6 +397,8 @@ function renderColunas() {
   const cont = $("colunas");
   if (!cont) return;
 
+  if (turnoAtivo) renderBarraTurno(); // atualiza a contagem quando as ocorrências mudam
+
   const pendentes = ocorrencias.filter(o => o.status === "pendente")
     .sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
   const finalizadas = ocorrencias.filter(o => o.status !== "pendente")
@@ -508,17 +556,25 @@ async function carregarHistorico() {
   cont.innerHTML = turnos.map(t => {
     const list = porTurno[t.id] || [];
     const cont2 = (s) => list.filter(o => o.status === s).length;
-    const pols = (t.policiais || []).map(p => `${p.graduacao||""} ${p.nome}${p.matricula?" ("+p.matricula+")":""}`.trim()).join(" • ");
+    const naoAtend = cont2("endereco_nao_encontrado") + cont2("nao_possivel");
+    const pols = (t.policiais || []).map(fmtPolicial).join(" • ");
+    const meta = [
+      t.viatura ? "🚓 " + esc(t.viatura) : "",
+      t.km ? "KM " + esc(t.km) : "",
+      (t.horaInicio || t.horaTermino) ? `⏱ ${esc(t.horaInicio || "?")}–${esc(t.horaTermino || "?")}` : ""
+    ].filter(Boolean).join(" · ");
     return `
     <details class="hist-item">
       <summary>
-        <b>${dataDe(t.inicio)}</b> ${t.viatura ? "— "+esc(t.viatura) : ""}
-        <span class="hist-resumo">✅ ${cont2("atendida")} · 🔍 ${cont2("endereco_nao_encontrado")} · ✖ ${cont2("nao_possivel")} · total ${list.length}</span>
+        <b>${dataDe(t.inicio)}</b>
+        <span class="hist-resumo">📨 ${list.length} · ✅ ${cont2("atendida")} · ✖ ${naoAtend}</span>
       </summary>
+      ${meta ? `<div class="hist-meta">${meta}</div>` : ""}
       <div class="hist-pols">${esc(pols) || "—"}</div>
+      ${t.observacoes ? `<div class="hist-obs">📝 ${esc(t.observacoes)}</div>` : ""}
       ${list.map(o => `<div class="hist-oc">
         <span class="tag ${(STATUS[o.status]||STATUS.pendente).classe}">${(STATUS[o.status]||STATUS.pendente).rotulo}</span>
-        <b>${esc(o.municipioBairro)}</b> — ${esc(o.enderecoIncidente)}
+        <b>${esc(tituloDe(o))}</b>${o.enderecoIncidente ? " — " + esc(o.enderecoIncidente) : ""}
       </div>`).join("")}
     </details>`;
   }).join("");
@@ -551,7 +607,7 @@ function horaDe(ts) {
 }
 function dataDe(ts) {
   if (!ts || !ts.toDate) return "—";
-  return ts.toDate().toLocaleString("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" });
+  return ts.toDate().toLocaleDateString("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric" });
 }
 function traduzErro(code) {
   const m = {
