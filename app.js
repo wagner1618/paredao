@@ -46,7 +46,6 @@ function preencherHoras() {
   ["turno-inicio-h", "turno-termino-h"].forEach(id => { $(id).innerHTML = opcoes(24); });
   ["turno-inicio-m", "turno-termino-m"].forEach(id => { $(id).innerHTML = opcoes(60); });
 }
-preencherHoras();
 
 // Monta "HH:MM" a partir dos dois seletores (ou "" se incompleto).
 const lerHora = (idH, idM) => {
@@ -58,6 +57,8 @@ const lerHora = (idH, idM) => {
 const $ = (id) => document.getElementById(id);
 const el = (sel) => document.querySelector(sel);
 const els = (sel) => Array.from(document.querySelectorAll(sel));
+
+preencherHoras();  // agora que "$" já existe, popula os seletores de hora
 
 // Botão "olhinho" para mostrar/ocultar senha
 els(".olho").forEach(btn => btn.addEventListener("click", () => {
