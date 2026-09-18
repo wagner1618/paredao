@@ -38,13 +38,13 @@ const GRADUACOES = ["Cap PM", "Ten PM", "Subten PM", "Sgt PM", "Cb PM", "Sd PM"]
 // Preenche os seletores de hora/minuto (evita o relógio nativo do Android,
 // cujo botão "Definir" às vezes aparece cortado no celular).
 function preencherHoras() {
-  const opcoes = (n) => {
+  const opcoes = (n, passo = 1) => {
     let html = '<option value="">--</option>';
-    for (let i = 0; i < n; i++) html += `<option>${String(i).padStart(2, "0")}</option>`;
+    for (let i = 0; i < n; i += passo) html += `<option>${String(i).padStart(2, "0")}</option>`;
     return html;
   };
   ["turno-inicio-h", "turno-termino-h"].forEach(id => { $(id).innerHTML = opcoes(24); });
-  ["turno-inicio-m", "turno-termino-m"].forEach(id => { $(id).innerHTML = opcoes(60); });
+  ["turno-inicio-m", "turno-termino-m"].forEach(id => { $(id).innerHTML = opcoes(60, 10); });
 }
 
 // Monta "HH:MM" a partir dos dois seletores (ou "" se incompleto).
