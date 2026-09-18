@@ -521,7 +521,9 @@ function abrirModalStatus(id, status) {
   acaoStatus = { id, status };
   $("modal-titulo").textContent = "Marcar como: " + (STATUS[status]?.rotulo || status);
   $("modal-sub").textContent = o ? tituloDe(o) : "";
-  $("modal-obs").value = (o && o.observacao) ? o.observacao : "";
+  // Ao marcar como Atendida, já sugere "som cessado" (a guarnição pode editar ou apagar).
+  $("modal-obs").value = (o && o.observacao) ? o.observacao
+    : (status === "atendida" ? "som cessado" : "");
   const btn = $("modal-confirmar");
   btn.className = "btn " + (status === "atendida" ? "btn-ok" : status === "nao_possivel" ? "btn-perigo" : "btn-neutro");
   $("modal-status").classList.remove("oculto");
