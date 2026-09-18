@@ -106,6 +106,9 @@ textarea{resize:vertical}
 .btn-seta:disabled{opacity:.25}
 .card-corpo{margin:8px 0;font-size:14px;line-height:1.5}
 .card-corpo span{color:var(--txt2)}
+.texto-oc{white-space:pre-wrap;word-break:break-word}
+.texto-oc-min{color:var(--txt2);font-size:13px}
+.previa-texto{white-space:pre-wrap;margin-top:4px;color:var(--txt2)}
 .link-mapa{display:inline-block;margin-top:6px;color:#7db8ff;text-decoration:none;font-size:13px}
 .card-acoes{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 .card-acoes .btn{flex:1;min-width:120px}

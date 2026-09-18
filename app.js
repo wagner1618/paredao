@@ -286,19 +286,31 @@ function parseOcorrencias(texto) {
   return registros.filter(r => r.municipioBairro || r.enderecoIncidente || r.descricao);
 }
 
+// Título curto do card (cidade/bairro, ou 1ª linha do texto)
+function tituloDe(o) {
+  if (o.municipioBairro) return o.municipioBairro;
+  const l = (o.rawText || "").split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+  return l[0] || "Ocorrência";
+}
+// Melhor endereço para o mapa (bastidor); se nada, usa a 1ª linha do texto
+function enderecoParaMapa(o) {
+  return o.enderecoIncidente || o.municipioBairro ||
+    (o.rawText || "").split(/\r?\n/).map(s => s.trim()).filter(Boolean)[0] || "";
+}
+// Texto completo, preservando as quebras de linha
+function textoHtml(raw) { return esc(raw || "").replace(/\n/g, "<br>"); }
+
 // -------- Botões do painel CICOM --------
 $("btn-previa").addEventListener("click", () => {
   const regs = parseOcorrencias($("entrada-colar").value);
   const previa = $("previa");
   if (regs.length === 0) { previa.classList.add("oculto"); toast("Nada reconhecido no texto."); return; }
   previa.classList.remove("oculto");
-  previa.innerHTML = `<p class="dica">${regs.length} ocorrência(s) reconhecida(s):</p>` +
+  previa.innerHTML = `<p class="dica">${regs.length} ocorrência(s):</p>` +
     regs.map((r, i) => `
       <div class="previa-card">
-        <b>#${i+1} — ${esc(r.municipioBairro) || "(sem município/bairro)"}</b>
-        <div><span>Incidente:</span> ${esc(r.enderecoIncidente) || "—"}</div>
-        <div><span>Referência:</span> ${esc(r.enderecoReferencia) || "—"}</div>
-        <div><span>Descrição:</span> ${esc(r.descricao) || "—"}</div>
+        <b>#${i+1} — ${esc(tituloDe(r))}</b>
+        <div class="previa-texto">${textoHtml(r.rawText)}</div>
       </div>`).join("");
 });
 
@@ -369,18 +381,16 @@ function cardPendente(o, idx, total) {
   <div class="card st-pendente" draggable="${podeAgir}" data-id="${o.id}" data-ordem="${o.ordem}">
     <div class="card-topo">
       <span class="pos">${idx + 1}º</span>
-      <b class="mun">${esc(o.municipioBairro) || "(sem município)"}</b>
+      <b class="mun">${esc(tituloDe(o))}</b>
       ${podeAgir ? `<span class="setas">
         <button class="btn-seta" data-mov="cima" data-id="${o.id}" ${idx===0?"disabled":""}>▲</button>
         <button class="btn-seta" data-mov="baixo" data-id="${o.id}" ${idx===total-1?"disabled":""}>▼</button>
       </span>` : ""}
     </div>
     <div class="card-corpo">
-      <div><span>📍 Incidente:</span> ${esc(o.enderecoIncidente) || "—"}</div>
-      ${o.enderecoReferencia ? `<div><span>🧭 Referência:</span> ${esc(o.enderecoReferencia)}</div>` : ""}
-      ${o.descricao ? `<div><span>📝</span> ${esc(o.descricao)}</div>` : ""}
-      ${o.enderecoIncidente ? `<a class="link-mapa" target="_blank"
-          href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.enderecoIncidente)}">Abrir no mapa ↗</a>` : ""}
+      <div class="texto-oc">${textoHtml(o.rawText)}</div>
+      ${enderecoParaMapa(o) ? `<a class="link-mapa" target="_blank"
+          href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(enderecoParaMapa(o))}">Abrir no mapa ↗</a>` : ""}
     </div>
     ${podeAgir ? `<div class="card-acoes">
       <button class="btn btn-ok"     data-fin="atendida"                data-id="${o.id}">Atendida</button>
@@ -398,10 +408,10 @@ function cardFinalizada(o) {
   <div class="card finalizada ${st.classe}" data-id="${o.id}">
     <div class="card-topo">
       <span class="tag ${st.classe}">${st.rotulo}</span>
-      <b class="mun">${esc(o.municipioBairro) || "(sem município)"}</b>
+      <b class="mun">${esc(tituloDe(o))}</b>
     </div>
     <div class="card-corpo">
-      <div><span>📍</span> ${esc(o.enderecoIncidente) || "—"}</div>
+      <div class="texto-oc texto-oc-min">${textoHtml(o.rawText)}</div>
       <div class="fin-meta">${o.finalizadoPor ? "por " + esc(o.finalizadoPor.split("@")[0]) : ""} ${horaDe(o.finalizadoEm)}</div>
     </div>
     ${perfil === "guarnicao" ? `<div class="card-acoes">
