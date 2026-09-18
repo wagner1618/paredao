@@ -154,13 +154,14 @@ function fmtPolicial(p) {
   return [p.funcao, p.graduacao, p.nome].filter(Boolean).join(" ");
 }
 
-// Contagem do serviço em andamento
+// Contagem do serviço em andamento.
+// "Não atendidas" = tudo que não foi atendido (pendentes + end. não encontrado + não possível).
 function contagem() {
-  const eh = (s) => ocorrencias.filter(o => o.status === s).length;
+  const atendidas = ocorrencias.filter(o => o.status === "atendida").length;
   return {
     enviadas: ocorrencias.length,
-    atendidas: eh("atendida"),
-    naoAtendidas: eh("endereco_nao_encontrado") + eh("nao_possivel")
+    atendidas,
+    naoAtendidas: ocorrencias.length - atendidas
   };
 }
 function htmlContagem() {
@@ -460,6 +461,7 @@ function cardFinalizada(o) {
     </div>
     <div class="card-corpo">
       <div class="texto-oc texto-oc-min">${textoHtml(o.rawText)}</div>
+      ${o.observacao ? `<div class="obs-oc">📝 ${esc(o.observacao)}</div>` : ""}
       <div class="fin-meta">${o.finalizadoPor ? "por " + esc(o.finalizadoPor.split("@")[0]) : ""} ${horaDe(o.finalizadoEm)}</div>
     </div>
     ${perfil === "guarnicao" ? `<div class="card-acoes">
@@ -468,14 +470,8 @@ function cardFinalizada(o) {
 }
 
 function ligarEventosCards() {
-  // Finalizar
-  els("[data-fin]").forEach(b => b.addEventListener("click", async () => {
-    await updateDoc(doc(db, "ocorrencias", b.dataset.id), {
-      status: b.dataset.fin,
-      finalizadoEm: serverTimestamp(),
-      finalizadoPor: usuario.email
-    });
-  }));
+  // Finalizar / trocar status -> abre a janela de confirmação
+  els("[data-fin]").forEach(b => b.addEventListener("click", () => abrirModalStatus(b.dataset.id, b.dataset.fin)));
   // Reabrir
   els("[data-reabrir]").forEach(b => b.addEventListener("click", async () => {
     await updateDoc(doc(db, "ocorrencias", b.dataset.reabrir), {
@@ -491,6 +487,43 @@ function ligarEventosCards() {
   // Arrastar (desktop)
   ligarDragDrop();
 }
+
+// ---- Janela de confirmação de status ----
+let acaoStatus = null; // { id, status }
+
+function abrirModalStatus(id, status) {
+  const o = ocorrencias.find(x => x.id === id);
+  acaoStatus = { id, status };
+  $("modal-titulo").textContent = "Marcar como: " + (STATUS[status]?.rotulo || status);
+  $("modal-sub").textContent = o ? tituloDe(o) : "";
+  $("modal-obs").value = (o && o.observacao) ? o.observacao : "";
+  const btn = $("modal-confirmar");
+  btn.className = "btn " + (status === "atendida" ? "btn-ok" : status === "nao_possivel" ? "btn-perigo" : "btn-neutro");
+  $("modal-status").classList.remove("oculto");
+  $("modal-obs").focus();
+}
+
+function fecharModalStatus() {
+  $("modal-status").classList.add("oculto");
+  acaoStatus = null;
+}
+
+async function confirmarModalStatus() {
+  if (!acaoStatus) return;
+  const { id, status } = acaoStatus;
+  await updateDoc(doc(db, "ocorrencias", id), {
+    status,
+    observacao: $("modal-obs").value.trim(),
+    finalizadoEm: serverTimestamp(),
+    finalizadoPor: usuario.email
+  });
+  fecharModalStatus();
+  toast("Ocorrência atualizada.");
+}
+
+$("modal-cancelar").addEventListener("click", fecharModalStatus);
+$("modal-confirmar").addEventListener("click", confirmarModalStatus);
+$("modal-status").addEventListener("click", (e) => { if (e.target.id === "modal-status") fecharModalStatus(); });
 
 async function mover(id, direcao) {
   const pend = ocorrencias.filter(o => o.status === "pendente")
@@ -575,6 +608,7 @@ async function carregarHistorico() {
       ${list.map(o => `<div class="hist-oc">
         <span class="tag ${(STATUS[o.status]||STATUS.pendente).classe}">${(STATUS[o.status]||STATUS.pendente).rotulo}</span>
         <b>${esc(tituloDe(o))}</b>${o.enderecoIncidente ? " — " + esc(o.enderecoIncidente) : ""}
+        ${o.observacao ? `<span class="hist-obs-oc">📝 ${esc(o.observacao)}</span>` : ""}
       </div>`).join("")}
     </details>`;
   }).join("");

@@ -99,6 +99,21 @@
 
   <div id="toast" class="toast oculto"></div>
 
+  <!-- ===== Janela de confirmação de status ===== -->
+  <div id="modal-status" class="modal-fundo oculto">
+    <div class="modal">
+      <h3 id="modal-titulo">Confirmar</h3>
+      <p id="modal-sub" class="dica"></p>
+      <label class="rotulo-campo">Observação (opcional)
+        <textarea id="modal-obs" rows="3" class="campo" placeholder="Ex.: orientado o solicitante, som cessado…"></textarea>
+      </label>
+      <div class="modal-acoes">
+        <button id="modal-cancelar" class="btn">Cancelar</button>
+        <button id="modal-confirmar" class="btn btn-primario">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="app.js"></script>
 </body>
 </html>
