@@ -352,34 +352,6 @@ function identificaRotulo(linha) {
   return null;
 }
 
-function ehRotulo(linha, chave) {
-  const r = identificaRotulo(linha);
-  return !!r && r.chave === chave;
-}
-
-// A cidade/bairro nem sempre vem com a etiqueta "Município/Bairro": muitas vezes
-// é só a 1ª linha. Por isso usamos "Endereço de incidente" (que aparece em toda
-// ocorrência) como âncora para separar vários blocos colados de uma vez.
-function separaPorIncidente(bloco) {
-  const lin = bloco.split(/\r?\n/).filter(l => l.trim());
-  const inc = [];
-  lin.forEach((l, i) => { if (ehRotulo(l, "enderecoIncidente")) inc.push(i); });
-  if (inc.length <= 1) return [bloco];
-
-  const inicios = [0];
-  for (let k = 1; k < inc.length; k++) {
-    let s = inc[k] - 1;                                   // linha do município (antes do "Endereço de incidente")
-    if (s - 1 >= 0 && ehRotulo(lin[s - 1], "municipioBairro")) s = s - 1; // inclui a etiqueta, se houver
-    inicios.push(s);
-  }
-  const recs = [];
-  for (let k = 0; k < inicios.length; k++) {
-    const fim = k + 1 < inicios.length ? inicios[k + 1] : lin.length;
-    recs.push(lin.slice(inicios[k], fim).join("\n"));
-  }
-  return recs;
-}
-
 // Extrai os campos de UMA ocorrência
 function parseUmRegistro(bloco) {
   const lin = bloco.split(/\r?\n/).filter(l => l.trim());
@@ -402,12 +374,12 @@ function parseUmRegistro(bloco) {
   return r;
 }
 
-// Divide um texto colado em uma ou mais ocorrências e extrai os campos
+// Trata todo o texto colado como UMA única ocorrência (sem dividir).
+// O CICOM lança uma ocorrência por vez — assim evitamos quebras erradas.
 function parseOcorrencias(texto) {
-  const blocos = texto.split(/\n\s*\n/).map(b => b.trim()).filter(Boolean);
-  const registros = [];
-  for (const b of blocos) separaPorIncidente(b).forEach(r => registros.push(parseUmRegistro(r)));
-  return registros.filter(r => r.municipioBairro || r.enderecoIncidente || r.descricao);
+  if (!texto.trim()) return [];
+  const r = parseUmRegistro(texto);
+  return (r.municipioBairro || r.enderecoIncidente || r.descricao) ? [r] : [];
 }
 
 // Título curto do card (cidade/bairro, ou 1ª linha do texto)
