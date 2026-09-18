@@ -481,7 +481,6 @@ function cardPendente(o, idx, total) {
   <div class="card st-pendente" draggable="${podeAgir}" data-id="${o.id}" data-ordem="${o.ordem}">
     <div class="card-topo">
       <span class="pos">${idx + 1}º</span>
-      <b class="mun">${esc(tituloDe(o))}</b>
       ${podeAgir ? `<span class="setas">
         <button class="btn-seta" data-mov="cima" data-id="${o.id}" ${idx===0?"disabled":""}>▲</button>
         <button class="btn-seta" data-mov="baixo" data-id="${o.id}" ${idx===total-1?"disabled":""}>▼</button>
@@ -508,7 +507,6 @@ function cardFinalizada(o) {
   <div class="card finalizada ${st.classe}" data-id="${o.id}">
     <div class="card-topo">
       <span class="tag ${st.classe}">${st.rotulo}</span>
-      <b class="mun">${esc(tituloDe(o))}</b>
     </div>
     <div class="card-corpo">
       <div class="texto-oc texto-oc-min">${textoHtml(o.rawText)}</div>

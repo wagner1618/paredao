@@ -128,7 +128,7 @@ select.campo{appearance:none;-webkit-appearance:none}
 .card-topo{display:flex;align-items:center;gap:8px}
 .pos{background:var(--verde2);color:#fff;font-weight:700;font-size:12px;border-radius:8px;padding:2px 7px;flex-shrink:0}
 .mun{flex:1;font-size:15px}
-.setas{display:flex;flex-direction:column;gap:2px}
+.setas{display:flex;flex-direction:column;gap:2px;margin-left:auto}
 .btn-seta{background:var(--card2);border:1px solid var(--linha);color:var(--txt);border-radius:6px;
   width:34px;height:24px;line-height:1;cursor:pointer;font-size:12px}
 .btn-seta:disabled{opacity:.25}
