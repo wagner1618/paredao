@@ -92,7 +92,10 @@
 
     <!-- ===== ABA HISTÓRICO ===== -->
     <main id="aba-historico" class="conteudo oculto">
-      <h2>Histórico de serviços</h2>
+      <div class="hist-topo">
+        <h2>Histórico de serviços</h2>
+        <button id="btn-limpar-hist" class="btn btn-mini btn-perigo oculto">🗑️ Limpar histórico</button>
+      </div>
       <div id="lista-historico"></div>
     </main>
   </section>
@@ -126,6 +129,22 @@
       <div class="modal-acoes">
         <button id="encerrar-cancelar" class="btn">Cancelar</button>
         <button id="encerrar-confirmar" class="btn btn-perigo">Encerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Janela de limpar histórico (com senha) ===== -->
+  <div id="modal-limpar" class="modal-fundo oculto">
+    <div class="modal">
+      <h3>🗑️ Limpar histórico?</h3>
+      <p class="dica">Isso apaga <b>definitivamente</b> todos os serviços já encerrados e as ocorrências deles. Não afeta o serviço em andamento. Esta ação não pode ser desfeita. Para confirmar, digite a senha.</p>
+      <label class="rotulo-campo">Senha
+        <input id="limpar-senha" type="password" class="campo" placeholder="Senha" autocomplete="off" />
+      </label>
+      <p id="limpar-erro" class="erro"></p>
+      <div class="modal-acoes">
+        <button id="limpar-cancelar" class="btn">Cancelar</button>
+        <button id="limpar-confirmar" class="btn btn-perigo">Limpar histórico</button>
       </div>
     </div>
   </div>

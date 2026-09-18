@@ -74,6 +74,7 @@ function entrarNoApp() {
   badge.textContent = perfil === "cicom" ? "CICOM" : "GUARNIÇÃO";
   badge.className = "badge " + (perfil === "cicom" ? "badge-cicom" : "badge-guarnicao");
   $("painel-cicom").classList.toggle("oculto", perfil !== "cicom");
+  $("btn-limpar-hist").classList.toggle("oculto", perfil !== "cicom");
   ouvirTurno();
   ouvirOcorrencias();
 }
@@ -640,6 +641,60 @@ async function carregarHistorico() {
     </details>`;
   }).join("");
 }
+
+// ---- Limpar histórico (somente CICOM, protegido por senha) ----
+const SENHA_LIMPAR = "MOW21ola&"; // diferencia maiúsculas/minúsculas
+
+function abrirModalLimpar() {
+  $("limpar-senha").value = "";
+  $("limpar-erro").textContent = "";
+  $("modal-limpar").classList.remove("oculto");
+  $("limpar-senha").focus();
+}
+function fecharModalLimpar() {
+  $("modal-limpar").classList.add("oculto");
+}
+
+// Apaga em lotes (Firestore limita 500 operações por lote)
+async function apagarEmLotes(docsRef) {
+  for (let i = 0; i < docsRef.length; i += 450) {
+    const batch = writeBatch(db);
+    docsRef.slice(i, i + 450).forEach(ref => batch.delete(ref));
+    await batch.commit();
+  }
+}
+
+async function confirmarLimparHistorico() {
+  if ($("limpar-senha").value !== SENHA_LIMPAR) {
+    $("limpar-erro").textContent = "Senha incorreta.";
+    $("limpar-senha").select();
+    return;
+  }
+  const btn = $("limpar-confirmar");
+  btn.disabled = true; btn.textContent = "Limpando…";
+  try {
+    // Serviços encerrados + ocorrências arquivadas (não mexe no serviço em andamento)
+    const turnosSnap = await getDocs(query(collection(db, "turnos"), where("ativo", "==", false)));
+    const ocorrSnap  = await getDocs(query(collection(db, "ocorrencias"), where("arquivada", "==", true)));
+    await apagarEmLotes([
+      ...turnosSnap.docs.map(d => doc(db, "turnos", d.id)),
+      ...ocorrSnap.docs.map(d => doc(db, "ocorrencias", d.id))
+    ]);
+    fecharModalLimpar();
+    toast(`Histórico limpo (${turnosSnap.size} serviço(s)).`);
+    carregarHistorico();
+  } catch (e) {
+    $("limpar-erro").textContent = "Erro ao limpar. Tente de novo.";
+  } finally {
+    btn.disabled = false; btn.textContent = "Limpar histórico";
+  }
+}
+
+$("btn-limpar-hist").addEventListener("click", abrirModalLimpar);
+$("limpar-cancelar").addEventListener("click", fecharModalLimpar);
+$("limpar-confirmar").addEventListener("click", confirmarLimparHistorico);
+$("limpar-senha").addEventListener("keydown", (e) => { if (e.key === "Enter") confirmarLimparHistorico(); });
+$("modal-limpar").addEventListener("click", (e) => { if (e.target.id === "modal-limpar") fecharModalLimpar(); });
 
 // ============================================================
 //  ABAS
